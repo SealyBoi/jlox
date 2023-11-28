@@ -13,10 +13,20 @@ public class GenerateAst {
 		String outputDir = args[0];
 		defineAst(outputDir, "Expr", Arrays.asList(
 				"Ternary	: Expr condition, Token operator, Expr expr1, Token or, Expr expr2",
+				"Assign		: Token name, Expr value",
 				"Binary 	: Expr left, Token operator, Expr right",
 				"Grouping	: Expr expression",
 				"Literal	: Object value",
-				"Unary		: Token operator, Expr right"
+				"Logical	: Expr left, Token operator, Expr right",
+				"Unary		: Token operator, Expr right",
+				"Variable	: Token name"
+		));
+		defineAst(outputDir, "Stmt", Arrays.asList(
+			"Block		: List<Stmt> statements",
+			"Expression : Expr expression",
+			"If			: Expr condition, Stmt thenBranch, Stmt elseBranch",
+			"Print		: Expr expression",
+			"Var		: Token name, Expr initializer"
 		));
 	}
 	

@@ -9,6 +9,7 @@ CLASSES = \
 		Main/Token.java \
 		Main/Scanner.java \
 		Main/Expr.java \
+		Main/Stmt.java \
 		Main/Parser.java \
 		Main/AstPrinter.java \
 		Main/RuntimeError.java \
