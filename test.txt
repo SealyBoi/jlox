@@ -1,17 +1,5 @@
-var a = 0;
-
-for (var i = 0; i < 10; i = i + 1) {
-    if (a > 8) {
-        break;
-    }
-    if (a > 5) {
-        a = 10;
-        continue;
-    }
-    if (a > 8) {
-        print("Greater than two");
-    }
-    a = a + 1;
+fun sayHi(first, last) {
+    print "Hi, " + first + " " + last + "!";
 }
 
-print(a);
+sayHi("Dear", "Reader");
