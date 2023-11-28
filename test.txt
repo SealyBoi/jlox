@@ -1,5 +1,16 @@
-var a = 1;
-{
-    var a = a + 2;
-    print a;
+var a = 0;
+
+for (var i = 0; i < 10; i = i + 1) {
+    if (a > 8) {
+        break;
+    }
+    if (a > 5) {
+        a = 10;
+        continue;
+    }
+    if (a > 8) {
+        print("Greater than two");
+    }
 }
+
+print(a);

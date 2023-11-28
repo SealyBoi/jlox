@@ -2,11 +2,17 @@ package Main;
 
 import java.util.List;
 
+import Main.Stmt.Break;
+
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	private Environment environment = new Environment();
 
 	void interpret(List<Stmt> statements) {
 		try {
+			if (statements.size() == 1 && statements.get(0) instanceof Stmt.Expression) {
+				Object value = evaluate(((Stmt.Expression)statements.get(0)).expression);
+				System.out.println(stringify(value));
+			}
 			for (Stmt statement : statements) {
 				execute(statement);
 			}
@@ -25,9 +31,11 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		Object left = evaluate(expr.left);
 
 		if (expr.operator.type == TokenType.OR) {
-			if (isTruthy(left)) return left;
+			if (isTruthy(left))
+				return left;
 		} else {
-			if (!isTruthy(left)) return left;
+			if (!isTruthy(left))
+				return left;
 		}
 
 		return evaluate(expr.right);
@@ -57,7 +65,8 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	@Override
 	public Object visitVariableExpr(Expr.Variable expr) {
 		Object value = environment.get(expr.name);
-		if (value == null) throw new RuntimeError(expr.name, "Undefined variable '" + expr.name.lexeme + "'.");
+		if (value == null)
+			throw new RuntimeError(expr.name, "Undefined variable '" + expr.name.lexeme + "'.");
 		return value;
 	}
 
@@ -207,9 +216,18 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	}
 
 	@Override
+	public Void visitBreakStmt(Stmt.Break stmt) {
+		throw new BreakLoop();
+	}
+
+	@Override
+	public Void visitContinueStmt(Stmt.Continue stmt) {
+		throw new ContinueLoop();
+	}
+
+	@Override
 	public Void visitExpressionStmt(Stmt.Expression stmt) {
-		Object value = evaluate(stmt.expression);
-		System.out.println(stringify(value));
+		evaluate(stmt.expression);
 		return null;
 	}
 
@@ -219,6 +237,20 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 			execute(stmt.thenBranch);
 		} else if (stmt.elseBranch != null) {
 			execute(stmt.elseBranch);
+		}
+		return null;
+	}
+
+	@Override
+	public Void visitWhileStmt(Stmt.While stmt) {
+		while (isTruthy(evaluate(stmt.condition))) {
+			try {
+				execute(stmt.body);
+			} catch (BreakLoop breakLoop) {
+				break;
+			} catch (ContinueLoop continueLoop) {
+				continue;
+			}
 		}
 		return null;
 	}

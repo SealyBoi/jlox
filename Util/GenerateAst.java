@@ -23,10 +23,12 @@ public class GenerateAst {
 		));
 		defineAst(outputDir, "Stmt", Arrays.asList(
 			"Block		: List<Stmt> statements",
+			"Break		: Token name",
 			"Expression : Expr expression",
 			"If			: Expr condition, Stmt thenBranch, Stmt elseBranch",
 			"Print		: Expr expression",
-			"Var		: Token name, Expr initializer"
+			"Var		: Token name, Expr initializer",
+			"While		: Expr condition, Stmt body"
 		));
 	}
 	
@@ -45,7 +47,10 @@ public class GenerateAst {
 		// The AST classes.
 		for (String type : types) {
 			String className = type.split(":")[0].trim();
-			String fields = type.split(":")[1].trim();
+			String fields = "";
+			if (type.split(":").length > 1) {
+				fields = type.split(":")[1].trim();
+			}
 			defineType(writer, baseName, className, fields);
 		}
 		
