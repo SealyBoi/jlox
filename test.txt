@@ -1,5 +1,6 @@
-fun sayHi(first, last) {
-    print "Hi, " + first + " " + last + "!";
+fun scope(a) {
+    var a = "local";
+    print a;
 }
 
-sayHi("Dear", "Reader");
+scope("global");
