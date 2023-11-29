@@ -49,6 +49,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             define(param);
         }
         resolve(stmt.function.body);
+        evaluateScope(stmt.name);
         endScope();
         currentFunction = enclosingFunction;
     }
@@ -73,6 +74,13 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     private void endScope() {
         scopes.pop();
+    }
+
+    private void evaluateScope(Token name) {
+        Map<String, Boolean> scope = scopes.peek();
+        if (scope.containsValue(false)) {
+            Lox.error(name, "Variable '" + name.lexeme + "' not used.");
+        }
     }
 
     private void declare(Token name) {

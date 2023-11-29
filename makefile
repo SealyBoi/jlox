@@ -12,8 +12,8 @@ CLASSES = \
 		Main/Stmt.java \
 		Main/Parser.java \
 		Main/RuntimeError.java \
-		Main/BreakLoop.java \
-		Main/ContinueLoop.java \
+		Main/Break.java \
+		Main/Continue.java \
 		Main/Return.java \
 		Main/Environment.java \
 		Main/LoxCallable.java \
