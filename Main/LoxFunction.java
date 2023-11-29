@@ -6,7 +6,6 @@ class LoxFunction implements LoxCallable {
     private final String name;
     private final Expr.Function declaration;
     private final Environment closure;
-
     private final boolean isInitializer;
 
     LoxFunction(String name, Expr.Function declaration, Environment closure, boolean isInitializer) {
@@ -34,25 +33,30 @@ class LoxFunction implements LoxCallable {
     @Override
     public Object call(Interpreter interpreter, List<Object> arguments) {
         Environment environment = new Environment(closure);
-        for (int i = 0; i < declaration.params.size(); i++) {
-            environment.define(declaration.params.get(i).lexeme, arguments.get(i));
+        if (declaration.params != null) {
+            for (int i = 0; i < declaration.params.size(); i++) {
+                environment.define(declaration.params.get(i).lexeme, arguments.get(i));
+            }
         }
 
         try {
             interpreter.executeBlock(declaration.body, environment);
         } catch (Return returnValue) {
-            if (isInitializer) return closure.getAt(0, "this");
+            if (isInitializer)
+                return closure.getAt(0, "this");
 
             return returnValue.value;
         }
 
-        if (isInitializer) return closure.getAt(0, "this");
+        if (isInitializer)
+            return closure.getAt(0, "this");
         return null;
     }
 
     @Override
     public String toString() {
-        if (name == null) return "<fn>";
+        if (name == null)
+            return "<fn>";
         return "<fn " + name + ">";
     }
 }
