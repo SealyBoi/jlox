@@ -18,6 +18,8 @@ CLASSES = \
 		Main/Environment.java \
 		Main/LoxCallable.java \
 		Main/LoxFunction.java \
+		Main/LoxInstance.java \
+		Main/LoxClass.java \
 		Main/Resolver.java \
 		Main/Interpreter.java \
 		Main/Lox.java
