@@ -1,7 +1,7 @@
 package Main;
 
-class BreakLoop extends RuntimeException {
-    BreakLoop(){
+class Break extends RuntimeException {
+    Break(){
         super(null, null, false, false);
     }
 }

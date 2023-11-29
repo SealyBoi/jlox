@@ -111,7 +111,7 @@ class Parser {
 
 		consume(SEMICOLON, "Expect ';' after 'break'.");
 
-		return new Stmt.Break();
+		return new Stmt.Break(previous());
 	}
 
 	private Stmt continueStatement() {
@@ -121,7 +121,7 @@ class Parser {
 
 		consume(SEMICOLON, "Expect ';' after 'continue'.");
 
-		return new Stmt.Continue();
+		return new Stmt.Continue(previous());
 	}
 
 	private Stmt forStatement() {

@@ -8,9 +8,21 @@ import java.util.Stack;
 class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Interpreter interpreter;
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
+    private FunctionType currentFunction = FunctionType.NONE;
+    private LoopType currentLoop = LoopType.NONE;
 
     Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
+    }
+
+    private enum FunctionType {
+        NONE,
+        FUNCTION
+    }
+
+    private enum LoopType {
+        NONE,
+        WHILE
     }
 
     void resolve(List<Stmt> statements) {
@@ -27,7 +39,10 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         expr.accept(this);
     }
 
-    private void resolveFunction(Stmt.Function stmt) {
+    private void resolveFunction(Stmt.Function stmt, FunctionType type) {
+        FunctionType enclosingFunction = currentFunction;
+        currentFunction = type;
+
         beginScope();
         for (Token param : stmt.function.params) {
             declare(param);
@@ -35,9 +50,13 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         }
         resolve(stmt.function.body);
         endScope();
+        currentFunction = enclosingFunction;
     }
 
-    private void resolveLambdaFunction(Expr.Function expr) {
+    private void resolveLambdaFunction(Expr.Function expr, FunctionType type) {
+        FunctionType enclosingFunction = currentFunction;
+        currentFunction = type;
+
         beginScope();
         for (Token param : expr.params) {
             declare(param);
@@ -45,6 +64,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         }
         resolve(expr.body);
         endScope();
+        currentFunction = enclosingFunction;
     }
 
     private void beginScope() {
@@ -60,6 +80,10 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             return;
 
         Map<String, Boolean> scope = scopes.peek();
+        if (scope.containsKey(name.lexeme)) {
+            Lox.error(name, "Already a variable with this name in this scope.");
+        }
+
         scope.put(name.lexeme, false);
     }
 
@@ -97,7 +121,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         declare(stmt.name);
         define(stmt.name);
 
-        resolveFunction(stmt);
+        resolveFunction(stmt, FunctionType.FUNCTION);
         return null;
     }
 
@@ -118,6 +142,10 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitReturnStmt(Stmt.Return stmt) {
+        if (currentFunction == FunctionType.NONE) {
+            Lox.error(stmt.keyword, "Can't return from top-level code.");
+        }
+
         if (stmt.value != null) {
             resolve(stmt.value);
         }
@@ -127,11 +155,19 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitBreakStmt(Stmt.Break stmt) {
+        if (currentLoop == LoopType.NONE) {
+            Lox.error(stmt.keyword, "Can't break outside of an enclosed loop.");
+        }
+
         return null;
     }
 
     @Override
     public Void visitContinueStmt(Stmt.Continue stmt) {
+        if (currentLoop == LoopType.NONE) {
+            Lox.error(stmt.keyword, "Can't continue outside of an enclosed loop.");
+        }
+        
         return null;
     }
 
@@ -147,14 +183,17 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
+        LoopType enclosingLoop = currentLoop;
+        currentLoop = LoopType.WHILE;
         resolve(stmt.condition);
         resolve(stmt.body);
+        currentLoop = enclosingLoop;
         return null;
     }
 
     @Override
     public Void visitFunctionExpr(Expr.Function expr) {
-        resolveLambdaFunction(expr);
+        resolveLambdaFunction(expr, FunctionType.FUNCTION);
         return null;
     }
 

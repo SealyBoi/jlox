@@ -39,17 +39,29 @@ abstract class Stmt {
 	}
 
 	static class Break extends Stmt {
+		Break(Token keyword) {
+			this.keyword = keyword;
+		}
+
 		@Override
 		<R> R accept(Visitor<R> visitor) {
 			return visitor.visitBreakStmt(this);
 		}
+
+		final Token keyword;
 	}
 
 	static class Continue extends Stmt {
+		Continue(Token keyword) {
+			this.keyword = keyword;
+		}
+
 		@Override
 		<R> R accept(Visitor<R> visitor) {
 			return visitor.visitContinueStmt(this);
 		}
+
+		final Token keyword;
 	}
 
 	static class Expression extends Stmt {
