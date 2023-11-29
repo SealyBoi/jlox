@@ -14,9 +14,11 @@ CLASSES = \
 		Main/RuntimeError.java \
 		Main/BreakLoop.java \
 		Main/ContinueLoop.java \
+		Main/Return.java \
 		Main/Environment.java \
 		Main/LoxCallable.java \
 		Main/LoxFunction.java \
+		Main/Resolver.java \
 		Main/Interpreter.java \
 		Main/Lox.java
 
