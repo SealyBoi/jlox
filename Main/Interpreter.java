@@ -291,7 +291,11 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	public Object visitGetExpr(Expr.Get expr) {
 		Object object = evaluate(expr.object);
 		if (object instanceof LoxInstance) {
-			return ((LoxInstance) object).get(expr.name);
+			Object result = ((LoxInstance) object).get(expr.name);
+			if (result instanceof LoxFunction && ((LoxFunction) result).isGetter()) {
+				return ((LoxFunction) result).call(this, null);
+			}
+			return result;
 		}
 
 		throw new RuntimeError(expr.name, "Only instances have properties.");
@@ -320,13 +324,21 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	public Void visitClassStmt(Stmt.Class stmt) {
 		environment.define(stmt.name.lexeme, null);
 
+		Map<String, LoxFunction> classMethods = new HashMap<>();
+		for (Stmt.Function method : stmt.classMethods) {
+			LoxFunction function = new LoxFunction(stmt.name.lexeme + "." + method.name.lexeme, method.function, environment, method.name.lexeme.equals("init"));
+			classMethods.put(method.name.lexeme, function);
+		}
+
+		LoxClass metaClass = new LoxClass(null, stmt.name.lexeme + " metaclass", classMethods);
+
 		Map<String, LoxFunction> methods = new HashMap<>();
 		for (Stmt.Function method : stmt.methods) {
 			LoxFunction function = new LoxFunction(method.name.lexeme, method.function, environment, method.name.lexeme.equals("init"));
 			methods.put(method.name.lexeme, function);
 		}
 
-		LoxClass klass = new LoxClass(stmt.name.lexeme, methods);
+		LoxClass klass = new LoxClass(metaClass, stmt.name.lexeme, methods);
 		environment.assign(stmt.name, klass);
 		return null;
 	}
